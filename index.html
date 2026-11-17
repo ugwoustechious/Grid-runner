@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Gridrunner Fight</title>
+<meta name="author" content="Gridrunner Fight">
+<meta name="description" content="A two player duel built on Gridrunner. Soldier, guns, grenades.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23090d12'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23e0b84a' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<!-- ------------------------------------------------------------- splash -->
+<div id="splash" class="screen">
+  <div class="splash-in">
+    <h1>GRIDRUNNER</h1>
+    <p class="sub">FIGHT</p>
+    <p class="tap">TAP TO START</p>
+  </div>
+</div>
+
+<!-- --------------------------------------------------------------- menu -->
+<div id="menu" class="screen hide">
+  <div class="brand">
+    <h1>GRIDRUNNER</h1>
+    <p>FIGHT &middot; 2 PLAYER DUEL</p>
+  </div>
+  <div class="stack">
+    <button id="b_local" class="btn pri">Local Duel<span>Two players, one keyboard</span></button>
+    <button id="b_bot" class="btn">Practice Bot<span>One player against the AI</span></button>
+    <button id="b_code" class="btn">Play a Friend<span>Connect code over WhatsApp</span></button>
+    <button id="b_server" class="btn">Server Room<span>Fallback: join through a relay</span></button>
+    <button id="b_help" class="btn sm alt">Controls</button>
+  </div>
+  <div class="corner">
+    <button id="b_snd" class="chip">Sound: On</button>
+    <button id="b_home" class="chip">GitHub</button>
+  </div>
+</div>
+
+<!-- ------------------------------------------------------------ loadout -->
+<div id="loadout" class="screen hide">
+  <div class="panel wide">
+    <div class="row top">
+      <h2 id="lo_title">Loadout</h2>
+      <div id="lo_slots" class="tabs"></div>
+    </div>
+    <div class="lo-cols">
+      <section>
+        <h3>Soldier</h3>
+        <div id="lo_sol" class="cards"></div>
+      </section>
+      <section>
+        <h3>Guns <em>pick two</em></h3>
+        <div id="lo_wep" class="cards"></div>
+      </section>
+      <section>
+        <h3>Grenade</h3>
+        <div id="lo_nade" class="cards"></div>
+      </section>
+    </div>
+    <div class="row bottom">
+      <button id="lo_back" class="btn sm">&#8249; Back</button>
+      <button id="lo_go" class="btn pri">Fight</button>
+    </div>
+  </div>
+</div>
+
+<!-- ------------------------------------------------------------ connect -->
+<div id="connect" class="screen hide">
+  <div class="panel wide">
+    <div class="row top">
+      <h2 id="cn_title">Play a Friend</h2>
+      <div class="tabs">
+        <button id="cn_tab_code" class="tab on">Connect code</button>
+        <button id="cn_tab_srv" class="tab">Server</button>
+      </div>
+    </div>
+
+    <!-- connect code -->
+    <div id="cn_code">
+      <div class="tabs sub">
+        <button id="cn_tab_host" class="tab on">I am hosting</button>
+        <button id="cn_tab_guest" class="tab">I was invited</button>
+      </div>
+
+      <div id="cn_host" class="pane">
+        <p class="note">Create a code, send it on WhatsApp. Your friend sends a reply code back, paste it and you are connected. No server in between.</p>
+        <button id="cn_gen" class="btn pri">Create my code</button>
+        <div id="cn_code_out" class="hide">
+          <label>Your code &mdash; send this</label>
+          <textarea id="cn_code_txt" class="code" readonly rows="4"></textarea>
+          <div class="row">
+            <button id="cn_copy" class="btn sm">Copy code</button>
+            <button id="cn_share" class="btn sm">Share on WhatsApp</button>
+          </div>
+        </div>
+        <label>Paste your friend's reply code</label>
+        <textarea id="cn_answer" rows="3" placeholder="paste the reply code here"></textarea>
+        <button id="cn_link" class="btn pri">Connect</button>
+      </div>
+
+      <div id="cn_guest" class="pane hide">
+        <p class="note">Paste the code your friend sent you, then send the reply code back to them.</p>
+        <label>Host code</label>
+        <textarea id="cn_offer" rows="3" placeholder="paste the host code here"></textarea>
+        <button id="cn_reply_gen" class="btn pri">Make my reply code</button>
+        <div id="cn_code_out2" class="hide">
+          <label>Your reply code &mdash; send this back</label>
+          <textarea id="cn_reply_txt" class="code" readonly rows="4"></textarea>
+          <div class="row">
+            <button id="cn_copy2" class="btn sm">Copy code</button>
+            <button id="cn_share2" class="btn sm">Share on WhatsApp</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- server -->
+    <div id="cn_server" class="pane hide">
+      <p class="note">Fallback path. Both players point at the same relay server and share one room code.</p>
+      <label>Server address</label>
+      <input id="cn_url" type="text" spellcheck="false" placeholder="ws://localhost:8787">
+      <label>Room code</label>
+      <div class="row">
+        <input id="cn_room" type="text" spellcheck="false" maxlength="12" placeholder="e.g. K7M2QX">
+        <button id="cn_dice" class="btn sm">Random</button>
+      </div>
+      <div class="row">
+        <button id="cn_create" class="btn pri">Create room</button>
+        <button id="cn_enter" class="btn">Join room</button>
+        <button id="cn_quick" class="btn sm alt">Quick match</button>
+      </div>
+      <p class="note small">Run <code>node server/server.js</code> to host your own. It prints a LAN address both players can use.</p>
+    </div>
+
+    <div class="row bottom">
+      <button id="cn_back" class="btn sm">&#8249; Back</button>
+      <span id="cn_status" class="status"></span>
+    </div>
+  </div>
+</div>
+
+<!-- -------------------------------------------------------------- pause -->
+<div id="pause" class="screen hide">
+  <div class="panel">
+    <h2>Paused</h2>
+    <button id="p_resume" class="btn pri">Resume</button>
+    <button id="p_restart" class="btn">Restart match</button>
+    <button id="p_quit" class="btn">Leave</button>
+  </div>
+</div>
+
+<!-- --------------------------------------------------------------- over -->
+<div id="over" class="screen hide">
+  <div class="panel">
+    <h2 id="o_title">Round over</h2>
+    <p id="o_sub" class="note"></p>
+    <div class="row">
+      <button id="o_again" class="btn pri">Rematch</button>
+      <button id="o_quit" class="btn">Leave</button>
+    </div>
+  </div>
+</div>
+
+<!-- --------------------------------------------------------------- help -->
+<div id="help" class="screen hide">
+  <div class="panel wide">
+    <h2>Controls</h2>
+    <div class="keys">
+      <div>
+        <h3>Player 1</h3>
+        <ul>
+          <li><b>W A S D</b> move</li>
+          <li><b>Mouse</b> aim</li>
+          <li><b>Left click</b> fire</li>
+          <li><b>Space</b> grenade</li>
+          <li><b>R</b> reload</li>
+          <li><b>Q</b> swap gun</li>
+          <li><b>1 / 2</b> pick gun</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Player 2</h3>
+        <ul>
+          <li><b>Arrows</b> move</li>
+          <li><b>I J K L</b> aim</li>
+          <li><b>Enter</b> fire</li>
+          <li><b>Right Shift</b> grenade</li>
+          <li><b>Right Ctrl</b> reload</li>
+          <li><b>/</b> swap gun</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Online</h3>
+        <ul>
+          <li>Each player uses their own device</li>
+          <li><b>WASD</b> move, <b>mouse</b> aim</li>
+          <li><b>Left click</b> fire</li>
+          <li><b>Space</b> grenade, <b>R</b> reload</li>
+          <li><b>Q</b> swap gun</li>
+          <li>A gamepad works too</li>
+        </ul>
+      </div>
+    </div>
+    <div class="row bottom"><button id="h_back" class="btn sm">&#8249; Back</button></div>
+  </div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
